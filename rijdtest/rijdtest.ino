@@ -7,6 +7,7 @@ int pwmPinL = 11;
 int brakePinL = 8;
 
 int speed = 50;
+String position ="";
 // sensors
 #define s1 A0
 #define s2 A1
@@ -43,6 +44,7 @@ Serial.begin(9600);
 }
 
 void loop() {
+position = readSensors();
 // als de value LOW is is de lijn onder die sensor hij is dus HIGH als de sensor wit ziet
 int value_1 = digitalRead(s1);
 int value_2 = digitalRead(s2);
@@ -50,34 +52,32 @@ int value_3 = digitalRead(s3);
 int value_4 = digitalRead(s4);
 int value_5 = digitalRead(s5);
 
-  if (
-    ( (value_1 == HIGH) && (value_2 == HIGH) && (value_3 == LOW) && (value_4 == HIGH) && (value_5 == HIGH) ) ||
-    (value_1 == HIGH) && (value_2 == LOW) && (value_3 == LOW) && (value_4 == LOW) && (value_5 == HIGH) ) { //Line is in center
+  if ( position =="11011") { //Line is in center
     forward();
     Serial.println("Going Forward");
   } 
   else if (
-    ((value_1 == HIGH) && (value_2 == LOW) && (value_3 == LOW) && (value_4 == HIGH) && (value_5 == HIGH))|| 
-    ((value_1 == LOW) && (value_2 == LOW) && (value_3 == LOW) && (value_4 == HIGH) && (value_5 == HIGH))||
-    ((value_1 == LOW) && (value_2 == LOW) && (value_3 == HIGH) && (value_4 == HIGH) && (value_5 == HIGH))||
-    ((value_1 == LOW) && (value_2 == HIGH) && (value_3 == HIGH) && (value_4 == HIGH) && (value_5 == HIGH))||
-    ((value_1 == HIGH) && (value_2 == LOW) && (value_3==LOW) && (value_4== HIGH) && (value_5 == LOW))||
-    ((value_1 == HIGH) && (value_2 == LOW) && (value_3==HIGH) && (value_4== HIGH) && (value_5 == HIGH))||
-    ((value_1 == LOW) && (value_2 == LOW) && (value_3==HIGH) && (value_4== HIGH) && (value_5 == LOW))||
-    ((value_1 == HIGH) && (value_2 == LOW) && (value_3==HIGH) && (value_4== LOW) && (value_5 == LOW))|| 
-    ((value_1 == LOW) && (value_2 == LOW) && (value_3==LOW) && (value_4== LOW) && (value_5 == HIGH)))
+    (position == "10011")|| 
+    (position == "00011")||
+    (position == "00111")||
+    (position == "01111")||
+    (position == "10010")||
+    (position == "10111")||
+    (position == "00110")||
+    (position == "10100")||
+    (position == "00001"))
     { //line is on the left side
     left();
   }
-  else if(
-    ( (value_5 == LOW) && (value_4 == HIGH) && (value_3==HIGH) && (value_2 == HIGH) && (value_1 == HIGH) ) ||
-    ( (value_4 == LOW && value_5 == LOW) && (value_3==HIGH) && (value_2 == HIGH) && (value_1 == HIGH) ) ||
-    ( (value_3 == LOW && value_4 == LOW && value_5 == LOW) && (value_2 == HIGH) && (value_1 == HIGH) ) ||
-    ( (value_3 == LOW && value_4 == LOW) && (value_5 == HIGH) && (value_2 == HIGH) && (value_1 == HIGH)||
-    ((value_1 == HIGH) && (value_2 == HIGH) && (value_3==HIGH) && (value_4== LOW) && (value_5 == HIGH))||
-    ((value_1 == LOW) && (value_2 == HIGH) && (value_3==HIGH) && (value_4== LOW) && (value_5 == LOW))||
-    ((value_1 == HIGH) && (value_2 == LOW) && (value_3==LOW) && (value_4== LOW) && (value_5 == LOW)))
-    ){
+    else if (
+    (position == "01111")|| 
+    (position == "00111")||
+    (position == "00011")||
+    (position == "11101")||
+    (position == "01100")||
+    (position == "10000"))
+
+    { //line is on the left side
     right();
   }
     else{
