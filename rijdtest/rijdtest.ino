@@ -85,7 +85,14 @@ int value_5 = digitalRead(s5);
   }
 }
 
-
+String readSensors(){
+  String value_1 = String(digitalRead(s1));
+  String value_2 = String(digitalRead(s2));
+  String value_3 = String(digitalRead(s3));
+  String value_4 = String(digitalRead(s4));
+  String value_5 = String(digitalRead(s5));
+  return value_1 + value_2 + value_3 + value_4 + value_5;
+}
 // Function to go forward
 void forward() {
   analogWrite(pwmPinR, speed);
