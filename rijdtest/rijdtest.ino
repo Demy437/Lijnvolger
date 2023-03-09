@@ -5,6 +5,8 @@ int brakePinR = 9;
 int directionPinL = 13; // LINKER MOTOR
 int pwmPinL = 11;
 int brakePinL = 8;
+
+int speed = 50;
 // sensors
 #define s1 A0
 #define s2 A1
@@ -28,6 +30,8 @@ pinMode(directionPinL, OUTPUT);
 pinMode(pwmPinL, OUTPUT);
 pinMode(brakePinL, OUTPUT);
 
+TCCR2B = TCCR2B & B11111000 | B00000111;
+
 // sensors
 pinMode(s1, INPUT);
 pinMode(s2, INPUT);
@@ -46,63 +50,79 @@ int value_3 = digitalRead(s3);
 int value_4 = digitalRead(s4);
 int value_5 = digitalRead(s5);
 
-if (value_3 == LOW){ //T Point
+  if (
+    ( (value_1 == HIGH) && (value_2 == HIGH) && (value_3 == LOW) && (value_4 == HIGH) && (value_5 == HIGH) ) ||
+    (value_1 == HIGH) && (value_2 == LOW) && (value_3 == LOW) && (value_4 == LOW) && (value_5 == HIGH) ) { //Line is in center
     forward();
+    Serial.println("Going Forward");
+  } 
+  else if (
+    ((value_1 == HIGH) && (value_2 == LOW) && (value_3 == LOW) && (value_4 == HIGH) && (value_5 == HIGH))|| 
+    ((value_1 == LOW) && (value_2 == LOW) && (value_3 == LOW) && (value_4 == HIGH) && (value_5 == HIGH))||
+    ((value_1 == LOW) && (value_2 == LOW) && (value_3 == HIGH) && (value_4 == HIGH) && (value_5 == HIGH))||
+    ((value_1 == LOW) && (value_2 == HIGH) && (value_3 == HIGH) && (value_4 == HIGH) && (value_5 == HIGH))||
+    ((value_1 == HIGH) && (value_2 == LOW) && (value_3==LOW) && (value_4== HIGH) && (value_5 == LOW))||
+    ((value_1 == HIGH) && (value_2 == LOW) && (value_3==HIGH) && (value_4== HIGH) && (value_5 == HIGH))||
+    ((value_1 == LOW) && (value_2 == LOW) && (value_3==HIGH) && (value_4== HIGH) && (value_5 == LOW))||
+    ((value_1 == HIGH) && (value_2 == LOW) && (value_3==HIGH) && (value_4== LOW) && (value_5 == LOW))|| 
+    ((value_1 == LOW) && (value_2 == LOW) && (value_3==LOW) && (value_4== LOW) && (value_5 == HIGH)))
+    { //line is on the left side
+    left();
   }
-  else{
+  else if(
+    ( (value_5 == LOW) && (value_4 == HIGH) && (value_3==HIGH) && (value_2 == HIGH) && (value_1 == HIGH) ) ||
+    ( (value_4 == LOW && value_5 == LOW) && (value_3==HIGH) && (value_2 == HIGH) && (value_1 == HIGH) ) ||
+    ( (value_3 == LOW && value_4 == LOW && value_5 == LOW) && (value_2 == HIGH) && (value_1 == HIGH) ) ||
+    ( (value_3 == LOW && value_4 == LOW) && (value_5 == HIGH) && (value_2 == HIGH) && (value_1 == HIGH)||
+    ((value_1 == HIGH) && (value_2 == HIGH) && (value_3==HIGH) && (value_4== LOW) && (value_5 == HIGH))||
+    ((value_1 == LOW) && (value_2 == HIGH) && (value_3==HIGH) && (value_4== LOW) && (value_5 == LOW))||
+    ((value_1 == HIGH) && (value_2 == LOW) && (value_3==LOW) && (value_4== LOW) && (value_5 == LOW)))
+    ){
+    right();
+  }
+    else{
     stop_robot();
   }
-
-
 }
+
+
 // Function to go forward
-String readSensors(){
-  String value_1 = String(digitalRead(s1));
-  String value_2 = String(digitalRead(s2));
-  String value_3 = String(digitalRead(s3));
-  String value_4 = String(digitalRead(s4));
-  String value_5 = String(digitalRead(s5));
-  return value_1 + value_2 + value_3 + value_4 + value_5;
-}
 void forward() {
-  analogWrite(pwmPinR, 100);
+  analogWrite(pwmPinR, speed);
   digitalWrite(directionPinR, LOW);
-  analogWrite(pwmPinL, 100);
+  analogWrite(pwmPinL, speed);
   digitalWrite(directionPinL, HIGH);
   Serial.println("Going forward");
 }
 
 void backward() {
-  analogWrite(pwmPinR, 100);
+  analogWrite(pwmPinR, 40);
   digitalWrite(directionPinR, HIGH);
-  analogWrite(pwmPinL, 100);
+  analogWrite(pwmPinL, 40);
   digitalWrite(directionPinL, LOW);
   Serial.println("Going backward");
-
 }
 
 void right() {
   digitalWrite(pwmPinR, 0);
   digitalWrite(directionPinR, LOW);
-  digitalWrite(pwmPinL, 100);
+  digitalWrite(pwmPinL, speed);
   digitalWrite(directionPinL, HIGH);
   Serial.println("Turning right");
-
 }
 
 void left() {
-  digitalWrite(pwmPinR, 100);
+  digitalWrite(pwmPinR, speed);
   digitalWrite(directionPinR, LOW);
   digitalWrite(pwmPinL, 0);
   digitalWrite(directionPinL, HIGH);
   Serial.println("Turning left");
-
 }
 
 void u_turn() {
-  digitalWrite(pwmPinR, 100);
+  digitalWrite(pwmPinR, speed);
   digitalWrite(directionPinR, HIGH);
-  digitalWrite(pwmPinL, 100);
+  digitalWrite(pwmPinL, speed);
   digitalWrite(directionPinL, HIGH);
   Serial.println("making a U-turn");
 }
@@ -115,5 +135,4 @@ void stop_robot() {
   digitalWrite(brakePinL, HIGH);
   digitalWrite(directionPinL, HIGH);
   Serial.println("Stopping robot");
-
 }
