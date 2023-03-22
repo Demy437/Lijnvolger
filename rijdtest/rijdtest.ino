@@ -6,8 +6,13 @@ int directionPinL = 13; // LINKER MOTOR
 int pwmPinL = 11;
 int brakePinL = 8;
 
-int speed = 50;
-String position ="";
+String lineposition ="";
+int starttijd = millis();
+
+// int speed = 45;//stopcontact
+int speed = 85;//batterij
+int defaultspeed = 75;
+
 // sensors
 #define s1 A0
 #define s2 A1
@@ -20,7 +25,7 @@ bool directionStateR;
 bool directionStateL;
 
 void setup() {
-  
+
 //define pins
 // motor Rechts
 pinMode(directionPinR, OUTPUT);
@@ -31,8 +36,8 @@ pinMode(directionPinL, OUTPUT);
 pinMode(pwmPinL, OUTPUT);
 pinMode(brakePinL, OUTPUT);
 
-TCCR2B = TCCR2B & B11111000 | B00000111;
-
+TCCR2B = TCCR2B & B11111000 | B00000110; // for PWM frequency of 122.55 Hz
+// TCCR2B = TCCR2B & B11111000 | B00000111; // for PWM frequency of 30.64 Hz
 // sensors
 pinMode(s1, INPUT);
 pinMode(s2, INPUT);
@@ -44,7 +49,8 @@ Serial.begin(9600);
 }
 
 void loop() {
-position = readSensors();
+
+lineposition = readSensors();
 // als de value LOW is is de lijn onder die sensor hij is dus HIGH als de sensor wit ziet
 int value_1 = digitalRead(s1);
 int value_2 = digitalRead(s2);
@@ -52,36 +58,22 @@ int value_3 = digitalRead(s3);
 int value_4 = digitalRead(s4);
 int value_5 = digitalRead(s5);
 
-  if ( position =="11011") { //Line is in center
-    forward();
-    Serial.println("Going Forward");
-  } 
-  else if (
-    (position == "10011")|| 
-    (position == "00011")||
-    (position == "00111")||
-    (position == "01111")||
-    (position == "10010")||
-    (position == "10111")||
-    (position == "00110")||
-    (position == "10100")||
-    (position == "00001"))
-    { //line is on the left side
-    left();
-  }
-    else if (
-    (position == "01111")|| 
-    (position == "00111")||
-    (position == "00011")||
-    (position == "11101")||
-    (position == "01100")||
-    (position == "10000"))
-
-    { //line is on the left side
+ 
+ 
+  if(lineposition == "11001" || lineposition == "11101" || lineposition == "11000" || lineposition == "11100" || lineposition == "11110" || lineposition == "00001"){
     right();
   }
-    else{
-    stop_robot();
+  else if(lineposition == "11011"){
+    forward();
+  }
+  else if(lineposition == "10111" || lineposition == "10011" || lineposition == "00011" || lineposition == "00111" || lineposition == "01111" || lineposition == "10000"){
+    left();
+  }
+  else if(lineposition == "11111"){
+    u_turn();
+  }
+  else if(lineposition == "00000"){
+    checkfinish();
   }
 }
 
@@ -103,43 +95,58 @@ void forward() {
 }
 
 void backward() {
-  analogWrite(pwmPinR, 40);
+  analogWrite(pwmPinR, speed);
   digitalWrite(directionPinR, HIGH);
-  analogWrite(pwmPinL, 40);
+  analogWrite(pwmPinL, speed);
   digitalWrite(directionPinL, LOW);
   Serial.println("Going backward");
 }
 
 void right() {
-  digitalWrite(pwmPinR, 0);
-  digitalWrite(directionPinR, LOW);
-  digitalWrite(pwmPinL, speed);
+  //  if(millis()-starttijd <1000){
+  //   speed = (speed - 10);
+  // }
+  analogWrite(pwmPinR, 0);
+  analogWrite(pwmPinL, speed);
   digitalWrite(directionPinL, HIGH);
-  Serial.println("Turning right");
+    // speed = defaultspeed;
 }
 
 void left() {
-  digitalWrite(pwmPinR, speed);
+  //  if(millis()-starttijd <1000){
+  //   speed = (speed - 10);
+  // }
+  analogWrite(pwmPinR, speed);
   digitalWrite(directionPinR, LOW);
-  digitalWrite(pwmPinL, 0);
-  digitalWrite(directionPinL, HIGH);
-  Serial.println("Turning left");
+  analogWrite(pwmPinL, 0);
+  // speed = defaultspeed;
 }
 
 void u_turn() {
-  digitalWrite(pwmPinR, speed);
+  //  if(millis()-starttijd <1000){
+  //   speed = (speed - 10);
+  // }
+  analogWrite(pwmPinR, speed);
   digitalWrite(directionPinR, HIGH);
-  digitalWrite(pwmPinL, speed);
+    analogWrite(pwmPinR, speed);
   digitalWrite(directionPinL, HIGH);
-  Serial.println("making a U-turn");
+  // speed = defaultspeed;
 }
 
-void stop_robot() {
-  digitalWrite(pwmPinR, 0);
+void stop() {
+  analogWrite(pwmPinR, 0);
   digitalWrite(brakePinR, HIGH);
   digitalWrite(directionPinR, LOW);
-  digitalWrite(pwmPinL, 0);
+  analogWrite(pwmPinL, 0);
   digitalWrite(brakePinL, HIGH);
   digitalWrite(directionPinL, HIGH);
   Serial.println("Stopping robot");
+}
+
+void checkfinish(){
+  delay(250);
+  lineposition = readSensors();
+  if(lineposition == "00000"){
+    stop();
+  }
 }
