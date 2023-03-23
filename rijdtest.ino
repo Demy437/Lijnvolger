@@ -40,6 +40,7 @@ int brakePinL = 8;
 #define s4 A3
 #define s5 A4
 
+TCCR2B = TCCR2B & B11111000 | B00000110; // for PWM frequency of 122.55 Hz
 //boolean to switch direction
 bool directionStateR;
 bool directionStateL;
