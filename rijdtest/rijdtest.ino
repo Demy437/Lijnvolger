@@ -1,3 +1,6 @@
+const int echoPin = 9;
+const int trigPin = 10;
+
 int directionPinR = 12;  //RECHTER MOTOR
 int pwmPinR = 3;
 int brakePinR = 9;
@@ -13,6 +16,9 @@ int starttijd = millis();
 int speed = 60;  //batterij
 int defaultspeed = 75;
 
+long duration;
+int distance;
+
 // sensors
 #define s1 2
 #define s2 4
@@ -27,6 +33,8 @@ bool directionStateL;
 void setup() {
 
   //define pins
+  pinMode(trigPin, OUTPUT);  // Sets the trigPin as an Output
+  pinMode(echoPin, INPUT);   // Sets the echoPin as an Input
   // motor Rechts
   pinMode(directionPinR, OUTPUT);
   pinMode(pwmPinR, OUTPUT);
@@ -49,8 +57,20 @@ void setup() {
 }
 
 void loop() {
-
-
+  // // Clears the trigPin
+  // digitalWrite(trigPin, LOW);
+  // delayMicroseconds(2);
+  // // Sets the trigPin on HIGH state for 10 micro seconds
+  // digitalWrite(trigPin, HIGH);
+  // delayMicroseconds(10);
+  // digitalWrite(trigPin, LOW);
+  // // Reads the echoPin, returns the sound wave travel time in microseconds
+  // duration = pulseIn(echoPin, HIGH);
+  // // Calculating the distance
+  // distance = duration * 0.034 / 2;
+  // // Prints the distance on the Serial Monitor
+  // Serial.print("Distance: ");
+  // Serial.println(distance);
   lineposition = readSensors();
   // als de value LOW is is de lijn onder die sensor hij is dus HIGH als de sensor wit ziet
   int value_1 = digitalRead(s1);
@@ -64,12 +84,12 @@ void loop() {
   if (lineposition == "11011") {
     forward();
   }
-  // } else if (lineposition == "10111" || lineposition == "10011" || lineposition == "00011" || lineposition == "00111" || lineposition == "01111") {
-  //   left();
-  // } else if (lineposition == "11001" || lineposition == "11101" || lineposition == "11100" || lineposition == "11110" || lineposition == "11000") {
-  //   right();
-  // }
-  // } else if (lineposition == "11000") {
+  else if (lineposition == "10111" || lineposition == "10011" || lineposition == "00011" || lineposition == "00111" || lineposition == "01111") {
+    left();
+  } else if (lineposition == "11001" || lineposition == "11101" || lineposition == "11100" || lineposition == "11110" || lineposition == "11000") {
+    right();
+  }
+  // else if (lineposition == "11000") {
   //   forward();
   //   delay(250);
   //   engage_brakes();
@@ -87,12 +107,11 @@ void loop() {
   //     delay(1000);
   //   }
   // }
-  // else if (lineposition == "11111") {
-  //   u_turn();
-  // } else if (lineposition == "00000") {
-  //   checkfinish();
-  // }
-  else { engage_brakes();}
+  else if (lineposition == "11111") {
+    u_turn();
+  } else if (lineposition == "00000") {
+    checkfinish();
+  }
 }
 
 String readSensors() {
