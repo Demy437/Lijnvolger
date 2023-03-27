@@ -3,17 +3,17 @@ const int trigPin = 10;
 
 int directionPinR = 12;  //RECHTER MOTOR
 int pwmPinR = 3;
-int brakePinR = 9;
+//int brakePinR = 9;
 
 int directionPinL = 13;  // LINKER MOTOR
 int pwmPinL = 11;
-int brakePinL = 8;
+//int brakePinL = 8;
 
 String lineposition = "";
 int starttijd = millis();
 
 // int speed = 45;//stopcontact
-int speed = 60;  //batterij
+int speed = 50;  //batterij
 int defaultspeed = 75;
 
 long duration;
@@ -38,11 +38,11 @@ void setup() {
   // motor Rechts
   pinMode(directionPinR, OUTPUT);
   pinMode(pwmPinR, OUTPUT);
-  pinMode(brakePinR, OUTPUT);
+  //pinMode(brakePinR, OUTPUT);
   // motor links
   pinMode(directionPinL, OUTPUT);
   pinMode(pwmPinL, OUTPUT);
-  pinMode(brakePinL, OUTPUT);
+  //pinMode(brakePinL, OUTPUT);
 
   //TCCR2B = TCCR2B & B11111000 | B00000110;  // for PWM frequency of 122.55 Hz
   TCCR2B = TCCR2B & B11111000 | B00000111;  // for PWM frequency of 30.64 Hz
@@ -57,20 +57,20 @@ void setup() {
 }
 
 void loop() {
-  // // Clears the trigPin
-  // digitalWrite(trigPin, LOW);
-  // delayMicroseconds(2);
-  // // Sets the trigPin on HIGH state for 10 micro seconds
-  // digitalWrite(trigPin, HIGH);
-  // delayMicroseconds(10);
-  // digitalWrite(trigPin, LOW);
-  // // Reads the echoPin, returns the sound wave travel time in microseconds
-  // duration = pulseIn(echoPin, HIGH);
-  // // Calculating the distance
-  // distance = duration * 0.034 / 2;
-  // // Prints the distance on the Serial Monitor
-  // Serial.print("Distance: ");
-  // Serial.println(distance);
+  // Clears the trigPin
+  digitalWrite(trigPin, LOW);
+  //delayMicroseconds(2);
+  // Sets the trigPin on HIGH state for 10 micro seconds
+  digitalWrite(trigPin, HIGH);
+  //delayMicroseconds(10);
+  digitalWrite(trigPin, LOW);
+  // Reads the echoPin, returns the sound wave travel time in microseconds
+  duration = pulseIn(echoPin, HIGH);
+  // Calculating the distance
+  distance = duration * 0.034 / 2;
+  // Prints the distance on the Serial Monitor
+  Serial.print("Distance: ");
+  Serial.println(distance);
   lineposition = readSensors();
   // als de value LOW is is de lijn onder die sensor hij is dus HIGH als de sensor wit ziet
   int value_1 = digitalRead(s1);
@@ -79,16 +79,17 @@ void loop() {
   int value_4 = digitalRead(s4);
   int value_5 = digitalRead(s5);
 
-  Serial.println(lineposition);
+  //Serial.println(lineposition);
 
-  if (lineposition == "11011") {
+  if (lineposition == "11011" || lineposition == "00011") {
     forward();
   }
-  else if (lineposition == "10111" || lineposition == "10011" || lineposition == "00011" || lineposition == "00111" || lineposition == "01111") {
-    left();
-  } else if (lineposition == "11001" || lineposition == "11101" || lineposition == "11100" || lineposition == "11110" || lineposition == "11000") {
+  else if (lineposition == "11001" || lineposition == "11101" || lineposition == "11100" || lineposition == "11110" || lineposition == "11000") {
     right();
   }
+  else if (lineposition == "10111" || lineposition == "10011" || lineposition == "00111" || lineposition == "01111") {
+    left();
+  } 
   // else if (lineposition == "11000") {
   //   forward();
   //   delay(250);
@@ -108,6 +109,8 @@ void loop() {
   //   }
   // }
   else if (lineposition == "11111") {
+    u_turn();
+  } else if(distance <= 10){
     u_turn();
   } else if (lineposition == "00000") {
     checkfinish();
@@ -154,8 +157,8 @@ void left() {
 }
 
 void u_turn() {
-  digitalWrite(directionPinL, HIGH);
-  digitalWrite(directionPinR, HIGH);
+  digitalWrite(directionPinL, LOW);
+  digitalWrite(directionPinR, LOW);
 
   analogWrite(pwmPinR, speed);
   analogWrite(pwmPinR, speed);
@@ -174,17 +177,17 @@ void stop() {
   analogWrite(pwmPinL, 0);
 }
 
-void engage_brakes() {
-  digitalWrite(brakePinL, HIGH);
-  digitalWrite(brakePinR, HIGH);
-}
-void disengage_brakes() {
-  digitalWrite(brakePinL, LOW);
-  digitalWrite(brakePinR, LOW);
-}
+// void engage_brakes() {
+//   digitalWrite(brakePinL, HIGH);
+//   digitalWrite(brakePinR, HIGH);
+// }
+// void disengage_brakes() {
+//   digitalWrite(brakePinL, LOW);
+//   digitalWrite(brakePinR, LOW);
+// }
 
 void checkfinish() {
-  delay(250);
+  delay(350);
   lineposition = readSensors();
   if (lineposition == "00000") {
     stop();
