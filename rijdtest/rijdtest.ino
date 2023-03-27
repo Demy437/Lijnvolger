@@ -1,5 +1,12 @@
+#include <NewPing.h>
+
+
+
 const int echoPin = 9;
 const int trigPin = 10;
+int MAX_DISTANCE = 100;  // Maximum distance we want to measure (in centimeters).
+
+NewPing sonar(trigPin, echoPin, MAX_DISTANCE);  // NewPing setup of pins and maximum distance.
 
 int directionPinR = 12;  //RECHTER MOTOR
 int pwmPinR = 3;
@@ -18,7 +25,7 @@ int defaultspeed = 75;
 
 long duration;
 int distance;
-
+int tempDistance;
 // sensors
 #define s1 2
 #define s2 4
@@ -57,20 +64,10 @@ void setup() {
 }
 
 void loop() {
-  // Clears the trigPin
-  digitalWrite(trigPin, LOW);
-  //delayMicroseconds(2);
-  // Sets the trigPin on HIGH state for 10 micro seconds
-  digitalWrite(trigPin, HIGH);
-  //delayMicroseconds(10);
-  digitalWrite(trigPin, LOW);
-  // Reads the echoPin, returns the sound wave travel time in microseconds
-  duration = pulseIn(echoPin, HIGH);
-  // Calculating the distance
-  distance = duration * 0.034 / 2;
+  tempDistance = sonar.ping_cm();
   // Prints the distance on the Serial Monitor
   Serial.print("Distance: ");
-  Serial.println(distance);
+  Serial.println(tempDistance);
   lineposition = readSensors();
   // als de value LOW is is de lijn onder die sensor hij is dus HIGH als de sensor wit ziet
   int value_1 = digitalRead(s1);
@@ -83,13 +80,11 @@ void loop() {
 
   if (lineposition == "11011" || lineposition == "00011") {
     forward();
-  }
-  else if (lineposition == "11001" || lineposition == "11101" || lineposition == "11100" || lineposition == "11110" || lineposition == "11000") {
+  } else if (lineposition == "11001" || lineposition == "11101" || lineposition == "11100" || lineposition == "11110" || lineposition == "11000") {
     right();
-  }
-  else if (lineposition == "10111" || lineposition == "10011" || lineposition == "00111" || lineposition == "01111") {
+  } else if (lineposition == "10111" || lineposition == "10011" || lineposition == "00111" || lineposition == "01111") {
     left();
-  } 
+  }
   // else if (lineposition == "11000") {
   //   forward();
   //   delay(250);
@@ -110,86 +105,98 @@ void loop() {
   // }
   else if (lineposition == "11111") {
     u_turn();
-  } else if(distance <= 10){
-    u_turn();
   } else if (lineposition == "00000") {
     checkfinish();
   }
-}
 
-String readSensors() {
-  String value_1 = String(digitalRead(s1));
-  String value_2 = String(digitalRead(s2));
-  String value_3 = String(digitalRead(s3));
-  String value_4 = String(digitalRead(s4));
-  String value_5 = String(digitalRead(s5));
-  return value_1 + value_2 + value_3 + value_4 + value_5;
-}
-// Function to go forward
-void forward() {
-  digitalWrite(directionPinR, LOW);
-  digitalWrite(directionPinL, HIGH);
-  analogWrite(pwmPinR, speed);
-  analogWrite(pwmPinL, speed);
-  Serial.println("Going forward");
-}
-
-
-void right() {
-  digitalWrite(directionPinL, HIGH);
-  analogWrite(pwmPinR, 0);
-  analogWrite(pwmPinL, speed);
-}
-
-void turnright() {
-  forward();
-  lineposition = readSensors();
-  if (lineposition == "10000" || lineposition == "11000") {
-    right();
+  if (tempDistance > 0) {
+    distance = tempDistance;
+    if (distance <= 10) {
+      u_turn();
+      delay(1000);
+    }
   }
 }
 
-
-void left() {
-  digitalWrite(directionPinR, LOW);
-  analogWrite(pwmPinR, speed);
-  analogWrite(pwmPinL, 0);
-}
-
-void u_turn() {
-  digitalWrite(directionPinL, LOW);
-  digitalWrite(directionPinR, LOW);
-
-  analogWrite(pwmPinR, speed);
-  analogWrite(pwmPinR, speed);
-}
-void backward() {
-  digitalWrite(directionPinR, HIGH);
-  digitalWrite(directionPinL, LOW);
-  analogWrite(pwmPinR, speed);
-  analogWrite(pwmPinL, speed);
-}
-
-void stop() {
-  digitalWrite(directionPinL, HIGH);
-  digitalWrite(directionPinR, LOW);
-  analogWrite(pwmPinR, 0);
-  analogWrite(pwmPinL, 0);
-}
-
-// void engage_brakes() {
-//   digitalWrite(brakePinL, HIGH);
-//   digitalWrite(brakePinR, HIGH);
-// }
-// void disengage_brakes() {
-//   digitalWrite(brakePinL, LOW);
-//   digitalWrite(brakePinR, LOW);
-// }
-
-void checkfinish() {
-  delay(350);
-  lineposition = readSensors();
-  if (lineposition == "00000") {
-    stop();
+  String readSensors() {
+    String value_1 = String(digitalRead(s1));
+    String value_2 = String(digitalRead(s2));
+    String value_3 = String(digitalRead(s3));
+    String value_4 = String(digitalRead(s4));
+    String value_5 = String(digitalRead(s5));
+    return value_1 + value_2 + value_3 + value_4 + value_5;
   }
-}
+  // Function to go forward
+  void forward() {
+    digitalWrite(directionPinR, LOW);
+    digitalWrite(directionPinL, HIGH);
+    analogWrite(pwmPinR, speed);
+    analogWrite(pwmPinL, speed);
+    Serial.println("Going forward");
+  }
+
+
+  void right() {
+    digitalWrite(directionPinL, HIGH);
+    analogWrite(pwmPinR, 0);
+    analogWrite(pwmPinL, speed);
+  }
+
+  void vergelijkPing() {
+    if (tempDistance > 0) {
+      distance = tempDistance;
+    }
+  }
+
+  void turnright() {
+    forward();
+    lineposition = readSensors();
+    if (lineposition == "10000" || lineposition == "11000") {
+      right();
+    }
+  }
+
+
+  void left() {
+    digitalWrite(directionPinR, LOW);
+    analogWrite(pwmPinR, speed);
+    analogWrite(pwmPinL, 0);
+  }
+
+  void u_turn() {
+    digitalWrite(directionPinL, LOW);
+    digitalWrite(directionPinR, LOW);
+
+    analogWrite(pwmPinR, speed);
+    analogWrite(pwmPinL, speed);
+  }
+  void backward() {
+    digitalWrite(directionPinR, HIGH);
+    digitalWrite(directionPinL, LOW);
+    analogWrite(pwmPinR, speed);
+    analogWrite(pwmPinL, speed);
+  }
+
+  void stop() {
+    digitalWrite(directionPinL, HIGH);
+    digitalWrite(directionPinR, LOW);
+    analogWrite(pwmPinR, 0);
+    analogWrite(pwmPinL, 0);
+  }
+
+  // void engage_brakes() {
+  //   digitalWrite(brakePinL, HIGH);
+  //   digitalWrite(brakePinR, HIGH);
+  // }
+  // void disengage_brakes() {
+  //   digitalWrite(brakePinL, LOW);
+  //   digitalWrite(brakePinR, LOW);
+  // }
+
+  void checkfinish() {
+    delay(350);
+    lineposition = readSensors();
+    if (lineposition == "00000") {
+      stop();
+    }
+  }
