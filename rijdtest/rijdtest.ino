@@ -1,9 +1,22 @@
 #include <NewPing.h>
 
+#define segA 8
+#define segB 9
+#define segC 10
+#define segD A0
+#define segE A1
+#define segF A2
+#define segG A3
 
+#define segU1 A4
+#define segU2 A5
 
-const int echoPin = 9;
-const int trigPin = 10;
+unsigned long correction;
+int disp1, disp2;
+bool displayStatus;
+
+const int echoPin = 1;
+const int trigPin = 0;
 int MAX_DISTANCE = 100;  // Maximum distance we want to measure (in centimeters).
 
 NewPing sonar(trigPin, echoPin, MAX_DISTANCE);  // NewPing setup of pins and maximum distance.
@@ -59,15 +72,13 @@ void setup() {
   pinMode(s3, INPUT);
   pinMode(s4, INPUT);
   pinMode(s5, INPUT);
-
-  Serial.begin(9600);
 }
 
 void loop() {
   tempDistance = sonar.ping_cm();
   // Prints the distance on the Serial Monitor
-  Serial.print("Distance: ");
-  Serial.println(tempDistance);
+  // Serial.print("Distance: ");
+  // Serial.println(tempDistance);
   lineposition = readSensors();
   // als de value LOW is is de lijn onder die sensor hij is dus HIGH als de sensor wit ziet
   int value_1 = digitalRead(s1);
@@ -133,7 +144,7 @@ void loop() {
     digitalWrite(directionPinL, HIGH);
     analogWrite(pwmPinR, speed);
     analogWrite(pwmPinL, speed);
-    Serial.println("Going forward");
+    //Serial.println("Going forward");
   }
 
 
