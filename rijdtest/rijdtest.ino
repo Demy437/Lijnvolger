@@ -206,7 +206,7 @@ void loop() {
   // }
 
   void checkfinish() {
-    delay(350);
+    delay(310);
     lineposition = readSensors();
     if (lineposition == "00000") {
       stop();
