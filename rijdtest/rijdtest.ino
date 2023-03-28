@@ -33,7 +33,7 @@ String lineposition = "";
 int starttijd = millis();
 
 // int speed = 45;//stopcontact
-int speed = 50;  //batterij
+int speed = 70;  //batterij
 int defaultspeed = 75;
 
 long duration;
@@ -49,9 +49,18 @@ int tempDistance;
 //boolean to switch direction
 bool directionStateR;
 bool directionStateL;
+bool isGestart;
 
 void setup() {
-
+  pinMode(segA, OUTPUT);
+  pinMode(segB, OUTPUT);
+  pinMode(segC, OUTPUT);
+  pinMode(segD, OUTPUT);
+  pinMode(segE, OUTPUT);
+  pinMode(segF, OUTPUT);
+  pinMode(segG, OUTPUT);
+  pinMode(segU1, OUTPUT);
+  pinMode(segU2, OUTPUT);
   //define pins
   pinMode(trigPin, OUTPUT);  // Sets the trigPin as an Output
   pinMode(echoPin, INPUT);   // Sets the echoPin as an Input
@@ -88,33 +97,18 @@ void loop() {
   int value_5 = digitalRead(s5);
 
   //Serial.println(lineposition);
-
+  while (millis() - starttijd < 1000) {
+    stuurDisplaysAan('s', 't');
+  }
+  zetAllesUit();
+  //laatTekenZien('s');
   if (lineposition == "11011" || lineposition == "00011") {
     forward();
   } else if (lineposition == "11001" || lineposition == "11101" || lineposition == "11100" || lineposition == "11110" || lineposition == "11000") {
     right();
   } else if (lineposition == "10111" || lineposition == "10011" || lineposition == "00111" || lineposition == "01111") {
     left();
-  }
-  // else if (lineposition == "11000") {
-  //   forward();
-  //   delay(250);
-  //   engage_brakes();
-  //   if (lineposition == "11011" || lineposition == "10001" || lineposition == "11001" || lineposition == "10011") {
-  //     disengage_brakes();
-  //     forward();
-  //   } else {
-  //     disengage_brakes();
-  //     backward();
-  //     delay(500);
-  //     engage_brakes();
-  //     delay(250);
-  //     disengage_brakes();
-  //     turnright();
-  //     delay(1000);
-  //   }
-  // }
-  else if (lineposition == "11111") {
+  } else if (lineposition == "11111") {
     u_turn();
   } else if (lineposition == "00000") {
     checkfinish();
@@ -122,93 +116,248 @@ void loop() {
 
   if (tempDistance > 0) {
     distance = tempDistance;
-    if (distance <= 10) {
-      u_turn();
-      delay(1000);
-      
+    if (distance <= 10) { 
+        u_turn();
+        delay(1000);
     }
   }
 }
 
-  String readSensors() {
-    String value_1 = String(digitalRead(s1));
-    String value_2 = String(digitalRead(s2));
-    String value_3 = String(digitalRead(s3));
-    String value_4 = String(digitalRead(s4));
-    String value_5 = String(digitalRead(s5));
-    return value_1 + value_2 + value_3 + value_4 + value_5;
+String readSensors() {
+  String value_1 = String(digitalRead(s1));
+  String value_2 = String(digitalRead(s2));
+  String value_3 = String(digitalRead(s3));
+  String value_4 = String(digitalRead(s4));
+  String value_5 = String(digitalRead(s5));
+  return value_1 + value_2 + value_3 + value_4 + value_5;
+}
+// Function to go forward
+void forward() {
+  digitalWrite(directionPinR, LOW);
+  digitalWrite(directionPinL, HIGH);
+  analogWrite(pwmPinR, speed);
+  analogWrite(pwmPinL, speed);
+  //Serial.println("Going forward");
+}
+
+
+void right() {
+  digitalWrite(directionPinL, HIGH);
+  analogWrite(pwmPinR, 0);
+  analogWrite(pwmPinL, speed);
+}
+
+void vergelijkPing() {
+  if (tempDistance > 0) {
+    distance = tempDistance;
   }
-  // Function to go forward
-  void forward() {
-    digitalWrite(directionPinR, LOW);
-    digitalWrite(directionPinL, HIGH);
-    analogWrite(pwmPinR, speed);
-    analogWrite(pwmPinL, speed);
-    //Serial.println("Going forward");
+}
+
+void turnright() {
+  forward();
+  lineposition = readSensors();
+  if (lineposition == "10000" || lineposition == "11000") {
+    right();
   }
+}
 
 
-  void right() {
-    digitalWrite(directionPinL, HIGH);
-    analogWrite(pwmPinR, 0);
-    analogWrite(pwmPinL, speed);
+void left() {
+  digitalWrite(directionPinR, LOW);
+  analogWrite(pwmPinR, speed);
+  analogWrite(pwmPinL, 0);
+}
+
+void u_turn() {
+  digitalWrite(directionPinL, LOW);
+  digitalWrite(directionPinR, LOW);
+
+  analogWrite(pwmPinR, speed);
+  analogWrite(pwmPinL, speed);
+}
+void backward() {
+  digitalWrite(directionPinR, HIGH);
+  digitalWrite(directionPinL, LOW);
+  analogWrite(pwmPinR, speed);
+  analogWrite(pwmPinL, speed);
+}
+
+void stop() {
+  digitalWrite(directionPinL, HIGH);
+  digitalWrite(directionPinR, LOW);
+  analogWrite(pwmPinR, 0);
+  analogWrite(pwmPinL, 0);
+}
+
+// void engage_brakes() {
+//   digitalWrite(brakePinL, HIGH);
+//   digitalWrite(brakePinR, HIGH);
+// }
+// void disengage_brakes() {
+//   digitalWrite(brakePinL, LOW);
+//   digitalWrite(brakePinR, LOW);
+// }
+
+void checkfinish() {
+  delay(310);
+  lineposition = readSensors();
+  if (lineposition == "00000") {
+    stop();
+    stuurDisplaysAan('f', 'i');
   }
+}
 
-  void vergelijkPing() {
-    if (tempDistance > 0) {
-      distance = tempDistance;
-    }
+void zetAllesUit() {
+  digitalWrite(segA, LOW);
+  digitalWrite(segB, LOW);
+  digitalWrite(segC, LOW);
+  digitalWrite(segD, LOW);
+  digitalWrite(segE, LOW);
+  digitalWrite(segF, LOW);
+  digitalWrite(segG, LOW);
+  // digitalWrite(segU1, HIGH);
+  // digitalWrite(segU2, HIGH);
+}
+
+void laatTekenZien(char c) {
+  zetAllesUit();
+  switch (c) {
+    case 'f':
+      digitalWrite(segA, HIGH);
+      digitalWrite(segF, HIGH);
+      digitalWrite(segG, HIGH);
+      digitalWrite(segE, HIGH);
+      break;
+    case 'i':
+      digitalWrite(segB, HIGH);
+      digitalWrite(segC, HIGH);
+      break;
+    case 's':
+      digitalWrite(segA, HIGH);
+      digitalWrite(segF, HIGH);
+      digitalWrite(segG, HIGH);
+      digitalWrite(segC, HIGH);
+      digitalWrite(segD, HIGH);
+      break;
+    case 't':
+      digitalWrite(segF, HIGH);
+      digitalWrite(segG, HIGH);
+      digitalWrite(segE, HIGH);
+      digitalWrite(segD, HIGH);
+      break;
+    default:
+      zetAllesUit();
   }
-
-  void turnright() {
-    forward();
-    lineposition = readSensors();
-    if (lineposition == "10000" || lineposition == "11000") {
-      right();
-    }
+}
+void laatTekenZien(int i) {
+  zetAllesUit();
+  switch (i) {
+    case 1:
+      digitalWrite(segB, HIGH);
+      digitalWrite(segC, HIGH);
+      break;
+    case 2:
+      digitalWrite(segA, HIGH);
+      digitalWrite(segB, HIGH);
+      digitalWrite(segG, HIGH);
+      digitalWrite(segE, HIGH);
+      digitalWrite(segD, HIGH);
+      break;
+    case 3:
+      digitalWrite(segA, HIGH);
+      digitalWrite(segB, HIGH);
+      digitalWrite(segG, HIGH);
+      digitalWrite(segC, HIGH);
+      digitalWrite(segD, HIGH);
+      break;
+    case 4:
+      digitalWrite(segF, HIGH);
+      digitalWrite(segG, HIGH);
+      digitalWrite(segB, HIGH);
+      digitalWrite(segC, HIGH);
+      break;
+    case 5:
+      laatTekenZien('s');
+      break;
+    case 6:
+      digitalWrite(segA, HIGH);
+      digitalWrite(segF, HIGH);
+      digitalWrite(segG, HIGH);
+      digitalWrite(segE, HIGH);
+      digitalWrite(segC, HIGH);
+      digitalWrite(segD, HIGH);
+      break;
+    case 7:
+      digitalWrite(segA, HIGH);
+      digitalWrite(segB, HIGH);
+      digitalWrite(segC, HIGH);
+      break;
+    case 8:
+      digitalWrite(segA, HIGH);
+      digitalWrite(segB, HIGH);
+      digitalWrite(segC, HIGH);
+      digitalWrite(segD, HIGH);
+      digitalWrite(segE, HIGH);
+      digitalWrite(segF, HIGH);
+      digitalWrite(segG, HIGH);
+      break;
+    case 9:
+      digitalWrite(segA, HIGH);
+      digitalWrite(segB, HIGH);
+      digitalWrite(segC, HIGH);
+      digitalWrite(segD, HIGH);
+      digitalWrite(segF, HIGH);
+      digitalWrite(segG, HIGH);
+      break;
+    default:
+      digitalWrite(segA, HIGH);
+      digitalWrite(segF, HIGH);
+      digitalWrite(segE, HIGH);
+      digitalWrite(segD, HIGH);
+      digitalWrite(segC, HIGH);
+      digitalWrite(segB, HIGH);
   }
-
-
-  void left() {
-    digitalWrite(directionPinR, LOW);
-    analogWrite(pwmPinR, speed);
-    analogWrite(pwmPinL, 0);
+}
+void stuurDisplaysAan(int i1, int i2) {
+  if (millis() - correction > 4) {
+    displayStatus = !displayStatus;
+    correction = millis();
   }
-
-  void u_turn() {
-    digitalWrite(directionPinL, LOW);
-    digitalWrite(directionPinR, LOW);
-
-    analogWrite(pwmPinR, speed);
-    analogWrite(pwmPinL, speed);
+  if (displayStatus) {
+    digitalWrite(segU1, LOW);
+    digitalWrite(segU2, HIGH);
+    laatTekenZien(i1);
   }
-  void backward() {
-    digitalWrite(directionPinR, HIGH);
-    digitalWrite(directionPinL, LOW);
-    analogWrite(pwmPinR, speed);
-    analogWrite(pwmPinL, speed);
+  if (!displayStatus) {
+    digitalWrite(segU1, HIGH);
+    digitalWrite(segU2, LOW);
+    laatTekenZien(i2);
   }
-
-  void stop() {
-    digitalWrite(directionPinL, HIGH);
-    digitalWrite(directionPinR, LOW);
-    analogWrite(pwmPinR, 0);
-    analogWrite(pwmPinL, 0);
+}
+void stuurDisplaysAan(char c1, char c2) {
+  if (millis() - correction > 4) {
+    displayStatus = !displayStatus;
+    correction = millis();
   }
-
-  // void engage_brakes() {
-  //   digitalWrite(brakePinL, HIGH);
-  //   digitalWrite(brakePinR, HIGH);
-  // }
-  // void disengage_brakes() {
-  //   digitalWrite(brakePinL, LOW);
-  //   digitalWrite(brakePinR, LOW);
-  // }
-
-  void checkfinish() {
-    delay(310);
-    lineposition = readSensors();
-    if (lineposition == "00000") {
-      stop();
-    }
+  if (displayStatus) {
+    digitalWrite(segU1, LOW);
+    digitalWrite(segU2, HIGH);
+    laatTekenZien(c1);
   }
+  if (!displayStatus) {
+    digitalWrite(segU1, HIGH);
+    digitalWrite(segU2, LOW);
+    laatTekenZien(c2);
+  }
+}
+void optellen() {
+  if (disp1 == 9 && disp2 == 9) {
+    disp1 = 0;
+  }
+  if (disp2 == 9) {
+    disp1++;
+    disp2 = 0;
+  } else {
+    disp2++;
+  }
+}
