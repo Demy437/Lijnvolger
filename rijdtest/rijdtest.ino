@@ -114,6 +114,7 @@ void loop() {
     if (distance <= 10) {
       u_turn();
       delay(1000);
+      
     }
   }
 }
