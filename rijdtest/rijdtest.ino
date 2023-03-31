@@ -98,10 +98,10 @@ void loop() {
 
   //Serial.println(lineposition);
   while (millis() - starttijd < 1000) {
-    stuurDisplaysAan('s', 't');
+    useDisplays('s', 't');
   }
-  zetAllesUit();
-  //laatTekenZien('s');
+  displays();
+  //showChar('s');
   if (lineposition == "11011" || lineposition == "00011") {
     forward();
   } else if (lineposition == "11001" || lineposition == "11101" || lineposition == "11100" || lineposition == "11110" || lineposition == "11000") {
@@ -189,25 +189,15 @@ void stop() {
   analogWrite(pwmPinL, 0);
 }
 
-// void engage_brakes() {
-//   digitalWrite(brakePinL, HIGH);
-//   digitalWrite(brakePinR, HIGH);
-// }
-// void disengage_brakes() {
-//   digitalWrite(brakePinL, LOW);
-//   digitalWrite(brakePinR, LOW);
-// }
-
 void checkfinish() {
   delay(310);
   lineposition = readSensors();
   if (lineposition == "00000") {
     stop();
-    stuurDisplaysAan('f', 'i');
   }
 }
 
-void zetAllesUit() {
+void displays() {
   digitalWrite(segA, LOW);
   digitalWrite(segB, LOW);
   digitalWrite(segC, LOW);
@@ -219,19 +209,9 @@ void zetAllesUit() {
   // digitalWrite(segU2, HIGH);
 }
 
-void laatTekenZien(char c) {
-  zetAllesUit();
+void showChar(char c) {
+  displays();
   switch (c) {
-    case 'f':
-      digitalWrite(segA, HIGH);
-      digitalWrite(segF, HIGH);
-      digitalWrite(segG, HIGH);
-      digitalWrite(segE, HIGH);
-      break;
-    case 'i':
-      digitalWrite(segB, HIGH);
-      digitalWrite(segC, HIGH);
-      break;
     case 's':
       digitalWrite(segA, HIGH);
       digitalWrite(segF, HIGH);
@@ -246,79 +226,11 @@ void laatTekenZien(char c) {
       digitalWrite(segD, HIGH);
       break;
     default:
-      zetAllesUit();
+      displays();
   }
 }
-void laatTekenZien(int i) {
-  zetAllesUit();
-  switch (i) {
-    case 1:
-      digitalWrite(segB, HIGH);
-      digitalWrite(segC, HIGH);
-      break;
-    case 2:
-      digitalWrite(segA, HIGH);
-      digitalWrite(segB, HIGH);
-      digitalWrite(segG, HIGH);
-      digitalWrite(segE, HIGH);
-      digitalWrite(segD, HIGH);
-      break;
-    case 3:
-      digitalWrite(segA, HIGH);
-      digitalWrite(segB, HIGH);
-      digitalWrite(segG, HIGH);
-      digitalWrite(segC, HIGH);
-      digitalWrite(segD, HIGH);
-      break;
-    case 4:
-      digitalWrite(segF, HIGH);
-      digitalWrite(segG, HIGH);
-      digitalWrite(segB, HIGH);
-      digitalWrite(segC, HIGH);
-      break;
-    case 5:
-      laatTekenZien('s');
-      break;
-    case 6:
-      digitalWrite(segA, HIGH);
-      digitalWrite(segF, HIGH);
-      digitalWrite(segG, HIGH);
-      digitalWrite(segE, HIGH);
-      digitalWrite(segC, HIGH);
-      digitalWrite(segD, HIGH);
-      break;
-    case 7:
-      digitalWrite(segA, HIGH);
-      digitalWrite(segB, HIGH);
-      digitalWrite(segC, HIGH);
-      break;
-    case 8:
-      digitalWrite(segA, HIGH);
-      digitalWrite(segB, HIGH);
-      digitalWrite(segC, HIGH);
-      digitalWrite(segD, HIGH);
-      digitalWrite(segE, HIGH);
-      digitalWrite(segF, HIGH);
-      digitalWrite(segG, HIGH);
-      break;
-    case 9:
-      digitalWrite(segA, HIGH);
-      digitalWrite(segB, HIGH);
-      digitalWrite(segC, HIGH);
-      digitalWrite(segD, HIGH);
-      digitalWrite(segF, HIGH);
-      digitalWrite(segG, HIGH);
-      break;
-    default:
-      digitalWrite(segA, HIGH);
-      digitalWrite(segF, HIGH);
-      digitalWrite(segE, HIGH);
-      digitalWrite(segD, HIGH);
-      digitalWrite(segC, HIGH);
-      digitalWrite(segB, HIGH);
-  }
-}
-void stuurDisplaysAan(int i1, int i2) {
+
+void useDisplays(char c1, char c2) {
   if (millis() - correction > 4) {
     displayStatus = !displayStatus;
     correction = millis();
@@ -326,38 +238,11 @@ void stuurDisplaysAan(int i1, int i2) {
   if (displayStatus) {
     digitalWrite(segU1, LOW);
     digitalWrite(segU2, HIGH);
-    laatTekenZien(i1);
+    showChar(c1);
   }
   if (!displayStatus) {
     digitalWrite(segU1, HIGH);
     digitalWrite(segU2, LOW);
-    laatTekenZien(i2);
-  }
-}
-void stuurDisplaysAan(char c1, char c2) {
-  if (millis() - correction > 4) {
-    displayStatus = !displayStatus;
-    correction = millis();
-  }
-  if (displayStatus) {
-    digitalWrite(segU1, LOW);
-    digitalWrite(segU2, HIGH);
-    laatTekenZien(c1);
-  }
-  if (!displayStatus) {
-    digitalWrite(segU1, HIGH);
-    digitalWrite(segU2, LOW);
-    laatTekenZien(c2);
-  }
-}
-void optellen() {
-  if (disp1 == 9 && disp2 == 9) {
-    disp1 = 0;
-  }
-  if (disp2 == 9) {
-    disp1++;
-    disp2 = 0;
-  } else {
-    disp2++;
+    showChar(c2);
   }
 }
